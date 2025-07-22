@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const mongoDb = require('./db');
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ const UserSchema = new mongoose.Schema({
   resetTokenExpiry: { type: Date, default: null }
 });
 
-const User = mongoose.model('User', UserSchema);
+const User = mongoDb.model('User', UserSchema);
 
 // Photo Schema
 const PhotoSchema = new mongoose.Schema({
@@ -57,7 +58,7 @@ const PhotoSchema = new mongoose.Schema({
   }]
 });
 
-const Photo = mongoose.model('Photo', PhotoSchema);
+const Photo = mongoDb.model('Photo', PhotoSchema);
 
 // Middleware to authenticate JWT token
 const authenticateToken = (req, res, next) => {
