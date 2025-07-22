@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Typography, Alert, Spin, Statistic, Row, Col, Switch } from 'antd';
+import { Card, Button, Typography, Alert, Spin, Statistic, Row, Col, Switch, Table, Divider } from 'antd';
 import { getUserProfile, getMyPhotos, togglePhotoActive } from '../api/photos';
 
 const { Title } = Typography;
@@ -40,6 +40,49 @@ const Profile = () => {
     }
   };
 
+  const genderColumns = [
+    {
+      title: 'Пол',
+      dataIndex: 'gender',
+      key: 'gender',
+    },
+    {
+      title: 'Количество оценок',
+      dataIndex: 'count',
+      key: 'count',
+    }
+  ];
+
+  const ageColumns = [
+    {
+      title: 'Возраст',
+      dataIndex: 'age',
+      key: 'age',
+    },
+    {
+      title: 'Количество оценок',
+      dataIndex: 'count',
+      key: 'count',
+    }
+  ];
+
+  const getGenderData = (photo) => {
+    return [
+      { key: 'male', gender: 'Мужской', count: photo.genderStats.male },
+      { key: 'female', gender: 'Женский', count: photo.genderStats.female },
+      { key: 'other', gender: 'Другой', count: photo.genderStats.other },
+    ];
+  };
+
+  const getAgeData = (photo) => {
+    return [
+      { key: '18-25', age: '18-25', count: photo.ageStats['18-25'] },
+      { key: '26-35', age: '26-35', count: photo.ageStats['26-35'] },
+      { key: '36-50', age: '36-50', count: photo.ageStats['36-50'] },
+      { key: '50+', age: '50+', count: photo.ageStats['50+'] },
+    ];
+  };
+
   if (loading) {
     return <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" /></div>;
   }
@@ -53,9 +96,9 @@ const Profile = () => {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 16px' }}>
       <Title level={2} style={{ textAlign: 'center' }}>Профиль</Title>
-      <div className="profile-info">
+      <div className="profile-info" style={{ marginBottom: '24px' }}>
         <Row gutter={16}>
           <Col span={12}>
             <Statistic title="Email" value={user.email} />
@@ -71,10 +114,11 @@ const Profile = () => {
       ) : (
         <Row gutter={[16, 16]}>
           {photos.map(photo => (
-            <Col span={8} key={photo.id} className="photo-card">
+            <Col span={24} key={photo.id} className="photo-card">
               <Card
                 hoverable
-                cover={<img alt="My photo" src={photo.imageUrl} className="photo-image" />}
+                cover={<img alt="Моя фотография" src={photo.imageUrl} style={{ height: 300, objectFit: 'cover' }} />}
+                style={{ marginBottom: '16px' }}
               >
                 <Card.Meta
                   title={`Средняя оценка: ${photo.averageScore.toFixed(1)}`}
@@ -88,6 +132,22 @@ const Profile = () => {
                     unCheckedChildren="Неактивно"
                   />
                 </div>
+                <Divider orientation="left">Статистика по полу</Divider>
+                <Table
+                  dataSource={getGenderData(photo)}
+                  columns={genderColumns}
+                  pagination={false}
+                  size="small"
+                  style={{ marginTop: '16px' }}
+                />
+                <Divider orientation="left">Статистика по возрасту</Divider>
+                <Table
+                  dataSource={getAgeData(photo)}
+                  columns={ageColumns}
+                  pagination={false}
+                  size="small"
+                  style={{ marginTop: '16px' }}
+                />
               </Card>
             </Col>
           ))}
