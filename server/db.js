@@ -13,3 +13,5 @@ mongoDb
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
+
+exports.default = mongoDb;
