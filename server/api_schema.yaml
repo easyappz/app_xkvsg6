@@ -1,0 +1,710 @@
+openapi: 3.0.0
+info:
+  title: Photo Rating API
+  version: 1.0.0
+  description: API for a photo rating application with user authentication and photo management.
+servers:
+  - url: /api
+    description: Base API URL
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password123
+              required: [email, password]
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Email and password are required
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Email already registered
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Registration failed: <error message>
+  /login:
+    post:
+      summary: Login a user and get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password123
+              required: [email, password]
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Email and password are required
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid credentials
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Login failed: <error message>
+  /forgot-password:
+    post:
+      summary: Request password reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+              required: [email]
+      responses:
+        '200':
+          description: Password reset token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password reset token generated
+                  resetToken:
+                    type: string
+                    example: abc123xyz456
+        '400':
+          description: Missing required field
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Email is required
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Password reset request failed: <error message>
+  /reset-password:
+    post:
+      summary: Reset password using token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resetToken:
+                  type: string
+                  example: abc123xyz456
+                newPassword:
+                  type: string
+                  example: newpassword123
+              required: [resetToken, newPassword]
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password reset successfully
+        '400':
+          description: Missing required fields or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid or expired reset token
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Password reset failed: <error message>
+  /upload-photo:
+    post:
+      summary: Upload a photo for rating
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                genderFilter:
+                  type: string
+                  enum: [male, female, other, any]
+                  example: any
+                ageFilter:
+                  type: string
+                  enum: [18-25, 26-35, 36-50, 50+, any]
+                  example: any
+              required: [photo]
+      responses:
+        '201':
+          description: Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Photo uploaded successfully
+                  photoId:
+                    type: string
+                    example: 60a7b8c9d1e2f3g4h5i6
+        '400':
+          description: No photo uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No photo uploaded
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication token missing
+        '403':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid token
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Photo upload failed: <error message>
+  /photos-to-rate:
+    get:
+      summary: Get photos to rate based on filters
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: gender
+          schema:
+            type: string
+            enum: [male, female, other, any]
+          required: false
+          description: Filter by gender
+        - in: query
+          name: age
+          schema:
+            type: string
+            enum: [18-25, 26-35, 36-50, 50+, any]
+          required: false
+          description: Filter by age group
+      responses:
+        '200':
+          description: List of photos to rate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  photos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 60a7b8c9d1e2f3g4h5i6
+                        imageUrl:
+                          type: string
+                          example: /uploads/1634567890123.jpg
+                        genderFilter:
+                          type: string
+                          example: any
+                        ageFilter:
+                          type: string
+                          example: any
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication token missing
+        '403':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid token
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch photos: <error message>
+  /rate-photo/{id}:
+    post:
+      summary: Rate a specific photo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Photo ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                score:
+                  type: number
+                  example: 4
+                gender:
+                  type: string
+                  enum: [male, female, other]
+                  example: male
+                age:
+                  type: string
+                  enum: [18-25, 26-35, 36-50, 50+]
+                  example: 18-25
+              required: [score]
+      responses:
+        '200':
+          description: Photo rated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Photo rated successfully
+        '400':
+          description: Invalid input or already rated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid score. Must be between 1 and 5
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication token missing
+        '403':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid token
+        '404':
+          description: Photo not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Photo not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Rating failed: <error message>
+  /my-photos:
+    get:
+      summary: Get user's uploaded photos with statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user's photos with stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  photos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 60a7b8c9d1e2f3g4h5i6
+                        imageUrl:
+                          type: string
+                          example: /uploads/1634567890123.jpg
+                        isActive:
+                          type: boolean
+                          example: true
+                        totalRatings:
+                          type: number
+                          example: 10
+                        averageScore:
+                          type: number
+                          example: 4.5
+                        genderStats:
+                          type: object
+                          properties:
+                            male:
+                              type: number
+                              example: 4
+                            female:
+                              type: number
+                              example: 5
+                            other:
+                              type: number
+                              example: 1
+                        ageStats:
+                          type: object
+                          properties:
+                            '18-25':
+                              type: number
+                              example: 3
+                            '26-35':
+                              type: number
+                              example: 3
+                            '36-50':
+                              type: number
+                              example: 2
+                            '50+':
+                              type: number
+                              example: 2
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication token missing
+        '403':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid token
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch user photos: <error message>
+  /photo/{id}/toggle-active:
+    patch:
+      summary: Toggle photo active status for rating
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Photo ID
+      responses:
+        '200':
+          description: Photo status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Photo status updated to active
+                  isActive:
+                    type: boolean
+                    example: true
+        '400':
+          description: Insufficient points
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Insufficient points to toggle photo status
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication token missing
+        '403':
+          description: Invalid token or unauthorized action
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized to modify this photo
+        '404':
+          description: Photo not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Photo not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to toggle photo status: <error message>
+  /user-profile:
+    get:
+      summary: Get user profile information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: user@example.com
+                      points:
+                        type: number
+                        example: 10
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Authentication token missing
+        '403':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid token
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to fetch user profile: <error message>
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
