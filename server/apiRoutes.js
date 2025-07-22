@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const mongoDb = require('./db');
+const { mongoDb } = require('./db');
 
 const router = express.Router();
 
