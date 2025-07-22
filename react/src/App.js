@@ -11,33 +11,58 @@ import UploadPhoto from './pages/UploadPhoto';
 import RatePhotos from './pages/RatePhotos';
 import Profile from './pages/Profile';
 import HeaderComponent from './components/HeaderComponent';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 
 const { Content, Footer } = Layout;
 
 function App() {
   return (
-    <Router>
-      <Layout className="layout">
-        <HeaderComponent />
-        <Content style={{ padding: '0 50px', marginTop: 64 }}>
-          <div className="site-layout-content">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/upload-photo" element={<UploadPhoto />} />
-              <Route path="/rate-photos" element={<RatePhotos />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </div>
-        </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          Photo Rating App ©2023
-        </Footer>
-      </Layout>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Layout className="layout">
+          <HeaderComponent />
+          <Content style={{ padding: '0 50px', marginTop: 64 }}>
+            <div className="site-layout-content">
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route 
+                  path="/upload-photo" 
+                  element={
+                    <ProtectedRoute>
+                      <UploadPhoto />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/rate-photos" 
+                  element={
+                    <ProtectedRoute>
+                      <RatePhotos />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="*" element={<Navigate to="/login" replace />} />
+              </Routes>
+            </div>
+          </Content>
+          <Footer style={{ textAlign: 'center' }}>
+            Photo Rating App ©2023
+          </Footer>
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 
