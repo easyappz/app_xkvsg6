@@ -18,6 +18,9 @@ instance.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      // Remove Authorization header if no token is present to avoid sending empty or invalid headers
+      delete config.headers['Authorization'];
     }
     return config;
   },
