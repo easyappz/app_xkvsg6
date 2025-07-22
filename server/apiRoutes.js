@@ -4,11 +4,18 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const router = express.Router();
 
 // JWT Secret Key (hardcoded as per instructions)
 const JWT_SECRET = 'mysecretkey123';
+
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Multer storage configuration for photo uploads
 const storage = multer.diskStorage({
