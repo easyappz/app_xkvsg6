@@ -14,4 +14,4 @@ mongoDb
     console.error('MongoDB connection error:', err);
   });
 
-exports.default = mongoDb;
+exports.mongoDb = mongoDb;
